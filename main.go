@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -9,10 +10,10 @@ import (
 )
 
 type Expense struct {
-	Id          int
-	Date        time.Time
-	Description string
-	Amount      float32
+	Id          int       `json:"id"`
+	Date        time.Time `json:"date"`
+	Description string    `json:"description"`
+	Amount      float32   `json:"amount"`
 }
 
 type Argument struct {
@@ -25,6 +26,7 @@ type Argument struct {
 
 func main() {
 
+	fmt.Println(time.Now())
 	args := os.Args
 	userInput := Argument{}
 
@@ -73,10 +75,23 @@ func main() {
 		}
 	}
 
-	expenses := []Expense{}
+	res, err := os.ReadFile("./data.json")
+	if err != nil {
+		log.Fatal("Unable to read the data from file")
+	}
+
+	var expenses []Expense
+
+	err = json.Unmarshal(res, &expenses)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(expenses)
 
 	switch userInput.Action {
 	case "add":
+
 		expense := Expense{
 			Id:          len(expenses) + 1,
 			Date:        time.Now(),
@@ -86,13 +101,17 @@ func main() {
 
 		expenses = append(expenses, expense)
 
-		for _, value := range expenses {
-			fmt.Printf("%d %s %f at %d\n", value.Id, value.Description, value.Amount, value.Date.Month())
+		data, err := json.Marshal(expenses)
+		if err != nil {
+			fmt.Println(err)
 		}
 
+		os.WriteFile("data.json", data, 0600)
+
 	case "list":
+
 		for _, value := range expenses {
-			fmt.Printf("%d %s %f at %d\n", value.Id, value.Description, value.Amount, value.Date.Month())
+			fmt.Printf("%d %s %f at %d/%d/%d\n", value.Id, value.Description, value.Amount, value.Date.Month(), value.Date.Day(), value.Date.Year())
 		}
 
 	}
