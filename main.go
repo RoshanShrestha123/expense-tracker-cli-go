@@ -145,6 +145,24 @@ func main() {
 
 		os.WriteFile("data.json", data, 0600)
 
+	case "summary":
+		var total float32
+
+		for _, value := range expenses {
+
+			if userInput.Month == "" {
+				total += value.Amount
+
+			}
+
+			userInputMonth, _ := strconv.ParseInt(userInput.Month, 10, 64)
+			if int(value.Date.Month()) == int(userInputMonth) {
+				total += value.Amount
+			}
+		}
+
+		fmt.Printf("Total Expenses is %f\n", total)
+
 	}
 
 }
