@@ -24,9 +24,20 @@ type Argument struct {
 	Action      string
 }
 
+func AutoIncrementId(data *[]Expense) int {
+	max := 0
+
+	for _, value := range *data {
+		if value.Id > max {
+			max = value.Id
+		}
+	}
+
+	return max + 1
+}
+
 func main() {
 
-	fmt.Println(time.Now())
 	args := os.Args
 	userInput := Argument{}
 
@@ -87,13 +98,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(expenses)
-
 	switch userInput.Action {
 	case "add":
 
 		expense := Expense{
-			Id:          len(expenses) + 1,
+			Id:          AutoIncrementId(&expenses),
 			Date:        time.Now(),
 			Description: userInput.Description,
 			Amount:      (userInput.Amount),
@@ -113,6 +122,28 @@ func main() {
 		for _, value := range expenses {
 			fmt.Printf("%d %s %f at %d/%d/%d\n", value.Id, value.Description, value.Amount, value.Date.Month(), value.Date.Day(), value.Date.Year())
 		}
+
+	case "delete":
+		var index int
+		if userInput.Id == 0 {
+			log.Fatal("Please provide the id to be removed")
+		}
+
+		for i, value := range expenses {
+			if value.Id == userInput.Id {
+				index = i
+				break
+			}
+		}
+
+		expenses = append(expenses[:index], expenses[index+1:]...)
+
+		data, err := json.Marshal(expenses)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		os.WriteFile("data.json", data, 0600)
 
 	}
 
