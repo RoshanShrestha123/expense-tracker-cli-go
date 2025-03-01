@@ -145,6 +145,32 @@ func main() {
 
 		os.WriteFile("data.json", data, 0600)
 
+	case "update":
+		var index int
+		if userInput.Id == 0 {
+			log.Fatal("Please provide the id ")
+		}
+
+		for i, value := range expenses {
+			if value.Id == userInput.Id {
+				index = i
+				break
+			}
+		}
+
+		toBeUpdate := expenses[index]
+
+		toBeUpdate.Description = userInput.Description
+		toBeUpdate.Amount = userInput.Amount
+
+		expenses[index] = toBeUpdate
+
+		data, err := json.Marshal(expenses)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		os.WriteFile("data.json", data, 0600)
 	case "summary":
 		var total float32
 
